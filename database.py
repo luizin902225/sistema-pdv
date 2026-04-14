@@ -8,7 +8,7 @@ def criar_tabelas(conn):
     #Tabela clientes
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS clientes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_clientes INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT,
         numero TEXT, 
         cpf TEXT,
@@ -20,7 +20,7 @@ def criar_tabelas(conn):
     #Tabela estoque
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS estoque (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_estoque INTEGER PRIMARY KEY AUTOINCREMENT,
         codigobarras TEXT,
         nome TEXT,
         preco REAL,
@@ -35,7 +35,7 @@ def criar_tabelas(conn):
     #Tabela vendas
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS vendas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_vendas INTEGER PRIMARY KEY AUTOINCREMENT,
         produto_id INTEGER,
         quantidade INTEGER, 
         total REAL,

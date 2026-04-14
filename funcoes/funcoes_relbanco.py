@@ -19,7 +19,7 @@ def atualizar_tabela_clientes(instancia_tela, termo=""):
 def buscar_clientes_db(nome):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT id, nome, email, numero, cpf, endereco FROM clientes WHERE nome LIKE ?", (f'%{nome}%',))
+        cursor.execute("SELECT id_clientes, nome, email, numero, cpf, endereco FROM clientes WHERE nome LIKE ?", (f'%{nome}%',))
         dados = cursor.fetchall()
         conn.close()
         return dados
@@ -38,24 +38,32 @@ def atualizar_tabela_estoque(instancia_tela, termo=""):
         instancia_tela.tabela.insert("", "end", values=linha)
     
 def buscar_estoque_db(nome):
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, codigobarras, nome, preco, quantidade, categoria, vencimento FROM estoque WHERE nome LIKE ?", (f'%{nome}%',))
-    dados = cursor.fetchall()
-    conn.close()
-    return dados
+    try:
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT id_estoque, codigobarras, nome, preco, quantidade, categoria, vencimento FROM estoque WHERE nome LIKE ?", (f'%{nome}%',))
+        dados = cursor.fetchall()
+        conn.close()
+        return dados
+    except sqlite3.Error as e:
+        print(f'Erro no banco de dados: {e}')
+        raise e
+        
 
 # --- FUNÇÃO PARA DELETAR ---
 def deletar_registro_no_banco(id_usuario):
-    """Esta função recebe um ID e apaga do banco de dados."""
-    conexao = sqlite3.connect('database.db')
-    cursor = conexao.cursor()
+    # Esta função recebe um ID e apaga do banco de dados.
+    try:
+        conexao = sqlite3.connect('database.db')
+        cursor = conexao.cursor()
     
-    # O comando SQL
-    cursor.execute("DELETE FROM usuarios WHERE id = ?", (id_usuario,))
+        cursor.execute("DELETE FROM usuarios WHERE id = ?", (id_usuario,))
     
-    conexao.commit()
-    conexao.close()
+        conexao.commit()
+        conexao.close()
+    except sqlite3.Error as e:
+        print(f'Erro no banco de dados: {e}')
+        raise e
     
 def atualizar_produto_db(id_produto, dados_novos):
     try:
