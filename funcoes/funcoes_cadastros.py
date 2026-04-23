@@ -75,14 +75,23 @@ def NovoProduto(parent):
 
     escolha_quantidade = ctk.CTkOptionMenu(cadastro, values=["3", "5", "10"], width=70)
     escolha_quantidade.place(x=245, y=385)
+    
+    lista_widgets = {
+        "cod": entrada_cod,
+        "nome": entrada_nome,
+        "estoque": entrada_estoque,
+        "valor": entrada_valor,
+        "venc": entrada_venc,
+        "cat": escolha_categoria,
+        "unid": escolha_unidade,
+        "min": escolha_quantidade
+    }
 
-    # --- BOTÃO SALVAR ---
-    # Nota: No command, use aviso_manutencao (sem o lambda se a função não tiver argumentos)
     btn_cadastrar = ctk.CTkButton(cadastro, text="CONCLUIR CADASTRO", 
                                   font=("Segoe UI", 16, "bold"), 
                                   fg_color=BTN_CONFIRMAR, hover_color="#059669",
-                                  width=300, height=45,
-                                  command=aviso_manutencao)
+                                  width=300, height=45, 
+                                  command= lambda: cadastrar_produto(lista_widgets, cadastro))
     btn_cadastrar.place(relx=0.5, y=520, anchor="center")
 
     print('Tela cadastro de produtos funcionando')
@@ -91,29 +100,45 @@ def NovoProduto(parent):
 imagem_3x4 = Image.open("imagens/Pessoa.png")#
 icone_3x4 = ctk.CTkImage(dark_image=imagem_3x4, light_image=imagem_3x4, size=(250, 300))
 
-def cadastrar_produto(dados, janela):
-    conn = sqlite3.connect("database.db")
-    cursor = conn.cursor()
+def cadastrar_produto(dados, janela): # Cadastro de produtos
+    try: 
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
     
-    cursor.execute("""
-        INSERT INTO estoque (codigobarras, nome, preco, quantidade, categoria, qntminima, unidade, vencimento)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        dados[""],
-        dados[""],
-        dados[""],
-        dados[""],
-        dados[""],
-        dados[""],
-        dados[""]
-    ))
+        cursor.execute("""
+            INSERT INTO estoque (codigobarras, nome, preco, quantidade, categoria, qntminima, unidade, vencimento)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            dados["cod"].get(),
+            dados["nome"].get(),     # Pegando o nome
+            dados["valor"].get(),    # Pegando o valor
+            dados["estoque"].get(),  # Pegando a quantidade
+            dados["cat"].get(),      # Pegando a categoria (OptionMenu)
+            dados["min"].get(),      # Pegando a quantidade mínima (OptionMenu)
+            dados["unid"].get(),     # Pegando a unidade (OptionMenu)
+            dados["venc"].get()
+        ))
+        conn.commit()
+        print("Produto cadastrado com sucesso!")
+        janela.destroy()
+    except KeyError as e:
+        print(f'Erro: A chave {e} não foi encontrada no dicionário de dados.')
+    except Exception as e:
+        print(f'Erro geral: {e}')
+    except sqlite3.Error as e:
+        print(f'Erro no banco de dados: {e}')
+        raise e
+    finally:
+        if conn:
+            conn.close()
+            print('Conexão com banco de produtos fechada com sucesso.')
 
 # | ====================================== | 
 # | Função utilizada para tela de cadastro | 
 # | No arquivo views/tela_clientes         | 
 # | ====================================== |
 
-def TelaCadastro(parent):
+def TelaCadastro(parent): # Cadastro de clientes
     cadastro = ctk.CTkToplevel(parent)
     cadastro.title("Cadastrar novo cliente")
     cadastro.geometry("700x580")
