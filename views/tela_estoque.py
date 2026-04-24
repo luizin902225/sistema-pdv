@@ -103,6 +103,7 @@ class MenuEstoque(ctk.CTkFrame):
                 
             except Exception as e:
                 messagebox.showerror("Erro", f"Não foi possível deletar do banco de dados: {e}")
+                
     def abrir_edicao(self):
         selecao = self.tabela.selection()
         if not selecao:
@@ -114,4 +115,4 @@ class MenuEstoque(ctk.CTkFrame):
         dados_da_linha = self.tabela.item(item_id)['values']
     
     # Abre a janela passando os dados e a função de atualizar a tabela
-        fc.EditarProduto(self, dados_da_linha, lambda: fp.atualizar_tabela_estoque(self, ""))
+        fc.EditarProduto(self, dados_da_linha, lambda: fp.atualizar_tabela_estoque(self, ""), fp.atualizar_produto_db)

@@ -71,8 +71,8 @@ def atualizar_produto_db(id_produto, dados_novos):
         cursor = conn.cursor()
         query = """
             UPDATE estoque 
-            SET codigobarras = ?, nome = ?, preco = ?, quantidade = ?, categoria = ?, qntminima = ?, unidade = ?, vencimento = ?, 
-            WHERE id = ?
+            SET codigobarras = ?, nome = ?, preco = ?, quantidade = ?, categoria = ?, qntminima = ?, unidade = ?, vencimento = ?
+            WHERE id_estoque = ?
         """
         cursor.execute(query, dados_novos)
         conn.commit()

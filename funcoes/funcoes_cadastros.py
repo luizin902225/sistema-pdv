@@ -133,6 +133,108 @@ def cadastrar_produto(dados, janela): # Cadastro de produtos
             conn.close()
             print('Conexão com banco de produtos fechada com sucesso.')
 
+def EditarProduto(parent, dados_atuais, callback_atualizar, atualizar_produto_db):
+    # DICA: Verifique no console o que está chegando aqui
+    print(f"DEBUG: Dados recebidos da tabela: {dados_atuais}")
+    
+    editar = ctk.CTkToplevel(parent)
+    editar.title("Editar Produto")
+    editar.geometry("400x600")
+    editar.attributes("-topmost", True)
+    editar.grab_set()
+    
+    # Se as cores não estiverem definidas como globais, o código usará o padrão do CTK
+    try:
+        editar.configure(fg_color=FUNDO_SECUNDARIO) 
+    except NameError:
+        pass 
+    
+    fonte_label = ctk.CTkFont("Segoe UI", 16)
+    fonte_entry = ctk.CTkFont("Segoe UI", 14)
+    
+    # --- FUNÇÃO AUXILIAR CORRIGIDA ---
+    def criar_campo(texto, x, y, largura=320):
+        lbl = ctk.CTkLabel(editar, text=texto, font=fonte_label)
+        lbl.place(x=x, y=y, anchor="w")
+        
+        ent = ctk.CTkEntry(editar, fg_color="white", text_color="black", 
+                           font=fonte_entry, width=largura, height=30)
+        ent.place(x=x, y=y + 25) 
+        return ent 
+
+    # Título da Tela
+    titulo = ctk.CTkLabel(editar, text="Editar Produto", font=("Segoe UI", 24, "bold"))
+    titulo.place(relx=0.5, y=25, anchor="center")
+
+    # --- GERANDO OS CAMPOS E PREENCHENDO DADOS (COM TRAVA DE SEGURANÇA) ---
+    # Índice 0 geralmente é o ID (escondido)
+    
+    entrada_cod = criar_campo("Código de barras:", 15, 70)
+    if len(dados_atuais) > 1: entrada_cod.insert(0, str(dados_atuais[1]))
+    
+    entrada_nome = criar_campo("Nome do produto:", 15, 140)
+    if len(dados_atuais) > 2: entrada_nome.insert(0, str(dados_atuais[2]))
+    
+    entrada_estoque = criar_campo("Estoque:", 15, 210, largura=150)
+    if len(dados_atuais) > 3: entrada_estoque.insert(0, str(dados_atuais[3]))
+
+    entrada_valor = criar_campo("Valor R$:", 185, 210, largura=150)
+    if len(dados_atuais) > 4: entrada_valor.insert(0, str(dados_atuais[4]))
+    
+    entrada_venc = criar_campo("Data de vencimento:", 15, 280, largura=180)
+    if len(dados_atuais) > 8:
+        entrada_venc.insert(0, str(dados_atuais[8]))
+
+    # --- SELEÇÕES (OPÇÕES) COM VERIFICAÇÃO DE ÍNDICE ---
+    lbl_opcoes = ctk.CTkLabel(editar, text="Categoria / Unid. / Mínimo:", font=fonte_label)
+    lbl_opcoes.place(x=15, y=355)
+
+    escolha_categoria = ctk.CTkOptionMenu(editar, values=["Medicamentos", "Rações", "Higiene Pet"], width=140)
+    if len(dados_atuais) > 5: escolha_categoria.set(dados_atuais[5])
+    escolha_categoria.place(x=15, y=385)
+
+    escolha_unidade = ctk.CTkOptionMenu(editar, values=["UN", "KG", "PCT"], width=70)
+    if len(dados_atuais) > 6: escolha_unidade.set(dados_atuais[6])
+    escolha_unidade.place(x=165, y=385)
+
+    escolha_quantidade = ctk.CTkOptionMenu(editar, values=["3", "5", "10"], width=70)
+    if len(dados_atuais) > 7: escolha_quantidade.set(dados_atuais[7])
+    escolha_quantidade.place(x=245, y=385)
+    
+    # --- FUNÇÃO INTERNA PARA SALVAR ---
+    def salvar_edicao():
+        try:
+            # Capturando os valores dos campos
+            novos_dados = (
+                entrada_cod.get(),
+                entrada_nome.get(),
+                entrada_valor.get(),
+                entrada_estoque.get(),
+                escolha_categoria.get(),
+                escolha_quantidade.get(),
+                escolha_unidade.get(),
+                entrada_venc.get(),
+                dados_atuais[0] # ID usado no WHERE do SQL
+            )
+            
+            # Executa o SQL
+            atualizar_produto_db(dados_atuais[0], novos_dados)
+            
+            messagebox.showinfo("Sucesso", "Produto atualizado!")
+            callback_atualizar() 
+            editar.destroy() 
+            
+        except Exception as e:
+            messagebox.showerror("Erro", f"Falha ao atualizar: {e}")
+
+    # Botão de Salvar
+    btn_salvar = ctk.CTkButton(editar, text="SALVAR ALTERAÇÕES", 
+                                font=("Segoe UI", 16, "bold"),
+                                height=45, width=300,
+                                command=salvar_edicao)
+    btn_salvar.place(relx=0.5, y=520, anchor="center")
+
+    print('Janela de edição pronta.')
 # | ====================================== | 
 # | Função utilizada para tela de cadastro | 
 # | No arquivo views/tela_clientes         | 
@@ -203,81 +305,3 @@ def cadastrar_pessoas(dados, janela):
     print(f"Cadastro realizado! Dados: {dados}")
     janela.destroy()
     
-def EditarProduto(parent, dados_atuais, callback_atualizar):
-    editar = ctk.CTkToplevel(parent)
-    editar.title("Cadastrar novo produto")
-    editar.geometry("400x600") # Ajustei o tamanho para algo mais proporcional
-    editar.attributes("-topmost", True)
-    editar.grab_set()
-    editar.configure(fg_color=FUNDO_SECUNDARIO)
-    
-    fonte_label = ctk.CTkFont("Segoe UI", 16)
-    fonte_entry = ctk.CTkFont("Segoe UI", 14)
-    
-    # --- FUNÇÃO AUXILIAR PARA CRIAR CAMPOS ---
-    def criar_campo(texto, x, y, largura=320):
-        lbl = ctk.CTkLabel(editar, text=texto, font=fonte_label, text_color=TEXTO_PRINCIPAL)
-        lbl.place(x=x, y=y, anchor="w")
-        
-        ent = ctk.CTkEntry(editar, fg_color="white", text_color="black", 
-                           font=fonte_entry, width=largura, height=30)
-        ent.place(x=x, y=y + 25) # Coloca o entry sempre 25px abaixo do label
-        return ent
-
-    # Título da Tela
-    titulo = ctk.CTkLabel(editar, text="Novo Produto", font=("Segoe UI", 24, "bold"), text_color=TEXTO_PRINCIPAL)
-    titulo.place(relx=0.5, y=25, anchor="center")
-
-    # --- GERANDO OS CAMPOS ---
-    # Agora basta uma linha para cada campo
-    entrada_cod     = criar_campo("Código de barras:", 15, 70)
-    entrada_nome    = criar_campo("Nome do produto:", 15, 140)
-    
-    # Campos lado a lado (Estoque e Valor)
-    entrada_estoque = criar_campo("Estoque:", 15, 210, largura=150)
-    entrada_valor   = criar_campo("Valor R$:", 185, 210, largura=150)
-    
-    entrada_venc    = criar_campo("Data de vencimento:", 15, 280, largura=180)
-
-    # --- SELEÇÕES (OPÇÕES) ---
-    lbl_opcoes = ctk.CTkLabel(editar, text="Categoria / Unid. / Mínimo:", font=fonte_label, text_color=TEXTO_PRINCIPAL)
-    lbl_opcoes.place(x=15, y=355)
-
-    escolha_categoria = ctk.CTkOptionMenu(editar, values=["Medicamentos", "Rações", "Higiene Pet"], width=140)
-    escolha_categoria.place(x=15, y=385)
-
-    escolha_unidade = ctk.CTkOptionMenu(editar, values=["UN", "KG", "PCT"], width=70)
-    escolha_unidade.place(x=165, y=385)
-
-    escolha_quantidade = ctk.CTkOptionMenu(editar, values=["3", "5", "10"], width=70)
-    escolha_quantidade.place(x=245, y=385)
-    
-    ent_cod = ctk.CTkEntry(editar, width=300)
-    ent_cod.insert(0, dados_atuais[1]) # Insere o código atual
-    ent_cod.place(x=15, y=90)
-    
-    ent_nome = ctk.CTkEntry(editar, width=300)
-    ent_nome.insert(0, dados_atuais[2]) # Insere o nome atual
-    ent_nome.place(x=15, y=165)
-
-    def salvar_edicao():
-        novos_dados = (
-            entrada_cod.get(),
-            entrada_nome.get(),
-            entrada_valor.get(),
-            entrada_estoque.get(),
-            escolha_categoria.get(),
-            escolha_quantidade.get(),
-            escolha_unidade.get(),
-            entrada_venc.get(),
-            dados_atuais[0] # O ID para o WHERE
-        )
-        
-        atualizar_produto_db(dados_atuais[0], novos_dados)
-        messagebox.showinfo("Sucesso", "Produto atualizado!")
-        callback_atualizar() # Chama a função para dar refresh na tabela principal
-        editar.destroy()
-
-    btn_salvar = ctk.CTkButton(editar, text="SALVAR ALTERAÇÕES", command=salvar_edicao)
-    btn_salvar.place(relx=0.5, y=520, anchor="center")
-    print('Função de edição funcionado')
