@@ -19,7 +19,18 @@ def atualizar_tabela_clientes(instancia_tela, termo=""):
 def buscar_clientes_db(nome):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT id_clientes, nome, email, numero, cpf, endereco FROM clientes WHERE nome LIKE ?", (f'%{nome}%',))
+        cursor.execute("""
+            SELECT 
+                id_clientes, 
+                nome, 
+                email, 
+                numero, 
+                cpf, 
+                endereco 
+            FROM clientes 
+            WHERE nome LIKE ?
+            ORDER BY nome ASC
+        """, (f'%{nome}%',))
         dados = cursor.fetchall()
         conn.close()
         return dados
@@ -41,7 +52,19 @@ def buscar_estoque_db(nome):
     try:
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT id_estoque, codigobarras, nome, 'R$ ' || REPLACE(printf('%.2f', preco), '.', ',') as preco, quantidade, categoria, strftime('%d/%m/%Y', vencimento) as vencimento FROM estoque WHERE nome LIKE ?", (f'%{nome}%',))
+        cursor.execute("""
+        SELECT 
+            id_estoque, 
+            codigobarras, 
+            nome, 
+            'R$ ' || REPLACE(printf('%.2f', preco), '.', ',') as preco, 
+            quantidade, 
+            categoria, 
+            strftime('%d/%m/%Y', vencimento) as vencimento 
+        FROM estoque 
+        WHERE nome LIKE ?
+        ORDER BY nome ASC
+        """, (f'%{nome}%',))
         dados = cursor.fetchall()
         conn.close()
         return dados

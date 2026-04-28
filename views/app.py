@@ -2,6 +2,7 @@ import customtkinter as ctk
 from views.tela_clientes import MenuClientes
 from views.tela_estoque import MenuEstoque
 from views.utils import aviso_manutencao
+from views.tela_relatorios import MenuRelatorios
 import time
 
 data = time.strftime("%d/%m/%Y")
@@ -33,7 +34,7 @@ class App(ctk.CTk):
         self.container_meio.pack(side="top", fill="both", expand=True)
 
         self.frames = {}
-        for F in (MenuIniciar, MenuClientes, MenuEstoque):
+        for F in (MenuIniciar, MenuClientes, MenuEstoque, MenuRelatorios):
             frame = F(self.container_meio, self) 
             self.frames[F] = frame
             frame.place(relwidth=1, relheight=1)
@@ -54,7 +55,7 @@ class App(ctk.CTk):
             ("💰\nVendas", lambda: aviso_manutencao(), BTN_NAV),
             ("👥\nClientes", lambda: self.mostrar_tela(MenuClientes), BTN_NAV),
             ("📦\nEstoque", lambda: self.mostrar_tela(MenuEstoque), BTN_NAV),
-            ("📊\nRelatórios", lambda: aviso_manutencao(), BTN_NAV),
+            ("📊\nRelatórios", lambda: self.mostrar_tela(MenuRelatorios), BTN_NAV),
             ("⚙️\nAjustes", lambda: aviso_manutencao(), BTN_NAV),
             ("👥\nUsuários", lambda: aviso_manutencao(), BTN_NAV),
             ("🚪\nSair", lambda: self.destroy(), BTN_CANCELAR),
