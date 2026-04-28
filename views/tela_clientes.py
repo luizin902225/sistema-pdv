@@ -31,7 +31,7 @@ class MenuClientes(ctk.CTkFrame):
         resto.pack(fill="both", expand=True)
         
         # Barra de pesquisa
-        self.entrada_pesquisa = ctk.CTkEntry(topo, placeholder_text="Digite aqui o nome...", font=("Segoe UI", 14), width=480, height=35)
+        self.entrada_pesquisa = ctk.CTkEntry(topo, placeholder_text="Digite aqui o nome...", font=("Segoe UI", 14), width=450, height=35)
         self.entrada_pesquisa.pack(side="left", padx=20, pady=20)
         
         # Bind do Enter 
@@ -44,7 +44,8 @@ class MenuClientes(ctk.CTkFrame):
             ("➕​Cadastrar", lambda: fc.TelaCadastro(self), BTN_NAV),
             ("🖊️​Editar", lambda: aviso_manutencao(), BTN_NAV),
             ("Fiados", lambda: aviso_manutencao(), BTN_NAV),
-            ("Notas em aberto", lambda: aviso_manutencao(), BTN_NAV)
+            ("Notas em aberto", lambda: aviso_manutencao(), BTN_NAV),
+            ("🗑️Deletar", self.deletar_cliente, BTN_CANCELAR)
         ]  
         for texto, comando, cor in botoes:
             btn = ctk.CTkButton(topo, font=("Segoe UI", 16), text=texto, command=comando, fg_color=cor, text_color=TEXTO_PRINCIPAL)
@@ -75,5 +76,34 @@ class MenuClientes(ctk.CTkFrame):
 
         self.tabela.pack(fill="both", expand=True, padx=20, pady=20)
         
-        # Carga inicial
         fp.atualizar_tabela_clientes(self, "")
+        
+    def deletar_cliente(self):
+        #  Verifica se há algo selecionado
+        item_selecionado = self.tabela.selection()
+        
+        if not item_selecionado:
+            messagebox.showwarning("Aviso", "Por favor, selecione um produto na tabela para deletar.")
+            return
+
+        #  Pega os dados da linha (o ID é o primeiro valor: index 0)
+        valores = self.tabela.item(item_selecionado)['values']
+        id_cliente = valores[0]
+        nome_cliente = valores[1]
+        cpf_cliente = valores[4]
+
+    #  Confirmação do usuário
+        confirmar = messagebox.askyesno("Confirmar Exclusão", f"Deseja realmente deletar o cliente:\n{nome_cliente} {cpf_cliente}?")
+    
+        if confirmar:
+            try:
+                cursor = self.conn.cursor()
+                cursor.execute("DELETE FROM clientes WHERE id_clientes = ?", (id_cliente,))
+                self.conn.commit()
+
+                #  Remove da interface e avisa o usuário
+                self.tabela.delete(item_selecionado)
+                messagebox.showinfo("Sucesso", f"Cliente removido com sucesso!\n{nome_cliente} {cpf_cliente}")
+                print(f'Nome: {nome_cliente} {cpf_cliente}.\n Excluído do banco com sucesso!')
+            except Exception as e:
+                messagebox.showerror("Erro", f"Não foi possível deletar do banco de dados: {e}")

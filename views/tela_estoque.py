@@ -100,7 +100,7 @@ class MenuEstoque(ctk.CTkFrame):
                 
                 #  Remove da interface e avisa o usuário
                 self.tabela.delete(item_selecionado)
-                messagebox.showinfo("Sucesso", f"Produto removido com sucesso!\nProduto removido: {nome_produto}")
+                messagebox.showinfo("Sucesso", f"Produto removido com sucesso!\n{nome_produto}")
                 print(f'Código: {cod_prod}. Nome: {nome_produto}.\n Excluído do banco com sucesso!')
             except Exception as e:
                 messagebox.showerror("Erro", f"Não foi possível deletar do banco de dados: {e}")

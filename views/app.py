@@ -3,6 +3,7 @@ from views.tela_clientes import MenuClientes
 from views.tela_estoque import MenuEstoque
 from views.utils import aviso_manutencao
 from views.tela_relatorios import MenuRelatorios
+from views.tela_venda import Venda
 import time
 
 data = time.strftime("%d/%m/%Y")
@@ -34,7 +35,7 @@ class App(ctk.CTk):
         self.container_meio.pack(side="top", fill="both", expand=True)
 
         self.frames = {}
-        for F in (MenuIniciar, MenuClientes, MenuEstoque, MenuRelatorios):
+        for F in (MenuIniciar, MenuClientes, MenuEstoque, MenuRelatorios, Venda):
             frame = F(self.container_meio, self) 
             self.frames[F] = frame
             frame.place(relwidth=1, relheight=1)
@@ -48,11 +49,14 @@ class App(ctk.CTk):
         titulo = ctk.CTkLabel(topo_titulo, text="MENU PRINCIPAL", font=("Segoe UI", 20, "bold"), text_color=TEXTO_SUBTITULO)
         titulo.place(relx=0.5, rely=0.5, anchor="center")
         
+        marcacao_data = ctk.CTkLabel(topo_titulo, text=f"{data}", font=("Segoe UI", 18, "bold"), text_color=TEXTO_SUBTITULO)
+        marcacao_data.place(relx=0.95, rely=0.5, anchor="center")
+        
         topo_botoes = ctk.CTkFrame(self.topo, fg_color="transparent")
         topo_botoes.pack(pady=10)
         
         botoes = [
-            ("💰\nVendas", lambda: aviso_manutencao(), BTN_NAV),
+            ("💰\nVendas", lambda: self.mostrar_tela(Venda), BTN_NAV),
             ("👥\nClientes", lambda: self.mostrar_tela(MenuClientes), BTN_NAV),
             ("📦\nEstoque", lambda: self.mostrar_tela(MenuEstoque), BTN_NAV),
             ("📊\nRelatórios", lambda: self.mostrar_tela(MenuRelatorios), BTN_NAV),
