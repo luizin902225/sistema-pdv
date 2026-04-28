@@ -5,7 +5,7 @@ import customtkinter as ctk
 from PIL import Image
 from views.utils import aviso_manutencao
 import funcoes.funcoes_cadastros as fc
-import funcoes.funcoes_relbanco as fp
+import funcoes.funcoes_relbanco as fb
 
 #Paleta de cores:
 FUNDO = "#0F172A"
@@ -33,11 +33,11 @@ class MenuEstoque(ctk.CTkFrame):
         self.entrada_pesquisa = ctk.CTkEntry(topo, placeholder_text="Digite aqui o nome...", font=("Segoe UI", 14), width=480, height=35)
         self.entrada_pesquisa.pack(side="left", padx=20, pady=20)
         
-        self.entrada_pesquisa.bind("<Return>", lambda e: fp.buscar_estoque(e, self))
-        self.entrada_pesquisa.bind("<KeyRelease>", lambda e: fp.buscar_estoque(e, self))
+        self.entrada_pesquisa.bind("<Return>", lambda e: fb.buscar_estoque(e, self))
+        self.entrada_pesquisa.bind("<KeyRelease>", lambda e: fb.buscar_estoque(e, self))
         
         botoes = [
-            ("🔍​Buscar", lambda: fp.buscar_estoque(None, self), BTN_NAV),
+            ("🔍​Buscar", lambda: fb.buscar_estoque(None, self), BTN_NAV),
             ("➕​Novo", lambda: fc.NovoProduto(self), BTN_NAV),
             ("🖊️​Editar", self.abrir_edicao, BTN_NAV),
             ("🗑️ Deletar", self.deletar_item, BTN_CANCELAR)
@@ -64,8 +64,8 @@ class MenuEstoque(ctk.CTkFrame):
         self.tabela.heading("vencimento", text="Data de vencimento")
         
         self.tabela.column("id", width=40, anchor="center", stretch=False)
-        self.tabela.column("codigobarras", width=200, minwidth=150)
-        self.tabela.column("nome", width=200, minwidth=150)
+        self.tabela.column("codigobarras", width=150, minwidth=100, anchor="center")
+        self.tabela.column("nome", width=250, minwidth=150, anchor="center")
         self.tabela.column("preco", width=80, anchor="center")
         self.tabela.column("quantidade", width=40, anchor="center")
         self.tabela.column("categoria", width=100, anchor="center")
@@ -73,34 +73,35 @@ class MenuEstoque(ctk.CTkFrame):
         
         self.tabela.pack(fill="both", expand=True, padx=20, pady=20)
         
-        fp.atualizar_tabela_estoque(self, "")
+        fb.atualizar_tabela_estoque(self, "")
         
     def deletar_item(self):
-        # 1. Verifica se há algo selecionado
+        #  Verifica se há algo selecionado
         item_selecionado = self.tabela.selection()
         
         if not item_selecionado:
             messagebox.showwarning("Aviso", "Por favor, selecione um produto na tabela para deletar.")
             return
 
-        # 2. Pega os dados da linha (o ID é o primeiro valor: index 0)
+        #  Pega os dados da linha (o ID é o primeiro valor: index 0)
         valores = self.tabela.item(item_selecionado)['values']
         id_produto = valores[0]
+        cod_prod = valores[1]
         nome_produto = valores[2]
 
-        # 3. Confirmação do usuário
+        #  Confirmação do usuário
         confirmar = messagebox.askyesno("Confirmar Exclusão", f"Deseja realmente deletar o produto:\n{nome_produto}?")
         
         if confirmar:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("DELETE FROM estoque WHERE id = ?", (id_produto,))
+                cursor.execute("DELETE FROM estoque WHERE id_estoque = ?", (id_produto,))
                 self.conn.commit()
                 
-                # 4. Remove da interface e avisa o usuário
+                #  Remove da interface e avisa o usuário
                 self.tabela.delete(item_selecionado)
-                messagebox.showinfo("Sucesso", "Produto removido com sucesso!")
-                
+                messagebox.showinfo("Sucesso", f"Produto removido com sucesso!\nProduto removido: {nome_produto}")
+                print(f'Código: {cod_prod}. Nome: {nome_produto}.\n Excluído do banco com sucesso!')
             except Exception as e:
                 messagebox.showerror("Erro", f"Não foi possível deletar do banco de dados: {e}")
                 
@@ -115,4 +116,4 @@ class MenuEstoque(ctk.CTkFrame):
         dados_da_linha = self.tabela.item(item_id)['values']
     
     # Abre a janela passando os dados e a função de atualizar a tabela
-        fc.EditarProduto(self, dados_da_linha, lambda: fp.atualizar_tabela_estoque(self, ""), fp.atualizar_produto_db)
+        fc.EditarProduto(self, dados_da_linha, lambda: fb.atualizar_tabela_estoque(self, ""), fb.atualizar_produto_db)

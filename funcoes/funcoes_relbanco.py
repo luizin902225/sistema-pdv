@@ -41,7 +41,7 @@ def buscar_estoque_db(nome):
     try:
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT id_estoque, codigobarras, nome, preco, quantidade, categoria, vencimento FROM estoque WHERE nome LIKE ?", (f'%{nome}%',))
+        cursor.execute("SELECT id_estoque, codigobarras, nome, 'R$ ' || REPLACE(printf('%.2f', preco), '.', ',') as preco, quantidade, categoria, strftime('%d/%m/%Y', vencimento) as vencimento FROM estoque WHERE nome LIKE ?", (f'%{nome}%',))
         dados = cursor.fetchall()
         conn.close()
         return dados
