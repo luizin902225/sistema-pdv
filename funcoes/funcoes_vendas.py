@@ -22,17 +22,6 @@ def adicionar_produto(event, venda):
     try:
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
-        cursor.execute("SELECT nome FROM estoque WHERE codigobarras LIKE ?", (f'%{codigo}%',))
-        dados = cursor.fetchone()
-
-        if dados:
-            venda.entrada_nome.configure(text=str(dados[0]))
-            venda.entrada_codigobarras.delete(0, 'end')
-            
-            venda.qnt_prod += 1
-            venda.entrada_qnt.configure(text=f'{venda.qnt_prod}')
-        else:
-            venda.entrada_nome.configure(text="Produto não encontrado")
             
         cursor.execute("SELECT nome, preco FROM estoque WHERE codigobarras = ?", (codigo,))
         produto = cursor.fetchone()
@@ -41,7 +30,6 @@ def adicionar_produto(event, venda):
             
             nome, preco = produto[0], produto[1]
 
-            
             # 1. Criar um frame para a linha (horizontal)
             linha = ctk.CTkFrame(venda.listadecompras, fg_color="transparent", height=40)
             linha.pack(fill="x", pady=2)
@@ -50,21 +38,47 @@ def adicionar_produto(event, venda):
             lbl_nome = ctk.CTkLabel(linha, text=nome, text_color="black", font=("Segoe UI", 14, "bold"))
             lbl_nome.pack(side="left", padx=10)
             
-            lbl_preco = ctk.CTkLabel(linha, text_color="black", text=f"R$ {preco:.2f}", font=("Segoe UI", 14, "bold"))
+            lbl_preco = ctk.CTkLabel(linha, text_color="black", text=f"R$ {preco:.2f}".replace('.', ','), font=("Segoe UI", 14, "bold"))
             lbl_preco.pack(side="right", padx=10)
             
+            produto_lista = {
+                "nome": nome,
+                "preco": preco
+            }
+            venda.itens_carrinho.append(produto_lista)
+            print(venda.itens_carrinho)
+            venda.qnt_prod += 1
+            venda.entrada_nome.configure(text=nome)
+            venda.entrada_preco.configure(text=f'R$ {preco:.2f}'.replace('.', ','))
+            venda.entrada_qnt.configure(text=f'{venda.qnt_prod}')
 
+            total = sum(item["preco"] for item in venda.itens_carrinho)
+            venda.entrada_valor_total.configure(text=f"R$ {total:.2f}".replace(".", ","))
+            venda.entrada_quantidade_comprada.configure(text="1")
             
             # Limpar para o próximo
             venda.entrada_codigobarras.delete(0, 'end')
+            
             
         else:
             venda.entrada_nome.configure(text="Não encontrado")
         
         conn.close()
             
-    except Exception as e:
-        print(f"Erro: {e}")
-        
     except sqlite3.Error as e:
         print(f'Erro no banco adicionar_produto: {e}')
+
+def procura_dados():
+    
+    try:
+        conn = sqlite3.connect("database.db")
+        cursor = conn.cursor()
+    
+        cursor.execute("SELECT nome FROM clientes ORDER BY nome ASC")
+        dados = cursor.fetchall()
+        
+        conn.close()
+        return [linha[0] for linha in dados]
+    
+    except sqlite3.Error as e:
+        print(f'Erro no banco da função procura_dados: {e}')
