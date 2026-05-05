@@ -69,7 +69,7 @@ class App(ctk.CTk):
             btn = ctk.CTkButton(topo_botoes, font=("Segoe UI", 20, "bold"), text=texto, width=110, height=70, fg_color=cor, hover_color="#2A3A4A", text_color=TEXTO_PRINCIPAL, command=comando)
             btn.pack(side="left", padx=10) 
             
-        print('Menu funcionando corretamente.')
+        print('RELATÓRIO: Menu funcionando corretamente.')
 
 
     def mostrar_tela(self, tela):
@@ -91,5 +91,5 @@ class MenuIniciar(ctk.CTkFrame):
         
         titulo_central = ctk.CTkLabel(self, text="SISTEMA PDV - v1.0", font=("Segoe UI", 50, "bold"), text_color=TEXTO_SUBTITULO)
         titulo_central.place(relx=0.5, rely=0.5, anchor="center")
-        print('Tela inicial funcionando.')
+        print('RELATÓRIO: Tela inicial funcionando.')
         

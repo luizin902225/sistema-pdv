@@ -29,7 +29,30 @@ class Venda(ctk.CTkFrame):
         self.controller = controller
         self.conn = controller.conn
         self.configure(fg_color=FUNDO)
+        fonte_titulo = ctk.CTkFont("Segoe UI", 26, "bold")
+        fonte_cod = ctk.CTkFont("Segoe UI", 22, "bold")
+        fonte_geral = ctk.CTkFont("Segoe UI", 15, "bold")
         
+        # Botões - Nova venda, Relatorio de vendas
+        relatorio_vendas = ctk.CTkButton(self, text="📋\nVendas", font=fonte_titulo, height=250, width=250)
+        relatorio_vendas.place(relx=0.52, rely=0.3, anchor="nw")
+        
+        nova_venda = ctk.CTkButton(self, text="🛒\nNova Venda", font=fonte_titulo, height=250, width=250, command=self.nova_venda)
+        nova_venda.place(relx=0.48, rely=0.3, anchor="ne")
+        
+    def nova_venda(self):
+        print("RELATÓRIO: Nova venda iniciada")
+
+        # 🔹 remove TODOS os elementos da tela
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        self.update()
+        
+        # 🔹 recria a tela limpa
+        self.tela_venda()
+        
+    def tela_venda(self):
         self.grid_columnconfigure(0, weight=1) 
         self.grid_columnconfigure(1, weight=2)
         self.grid_columnconfigure(2, weight=1)
@@ -93,22 +116,14 @@ class Venda(ctk.CTkFrame):
                                                 font=fonte_cod)
         self.entrada_valor_total.place(x=20, y=210)
         
-        entrada_cliente = ctk.CTkLabel(frame2, text="Cliente", text_color=TEXTO_PRINCIPAL, font=fonte_geral)
-        entrada_cliente.place(x=20, y=260)
-        self.entrada_cliente = ctk.CTkOptionMenu(frame2,
-                                                values=dados,
-                                                width=350,
-                                                height=45,
-                                                fg_color="white",
-                                                text_color="black",
-                                                font=fonte_cod, 
-                                                dropdown_font=fonte_cod)
-        self.entrada_cliente.place(x=20, y=290)
+        self.qnt_prod = 0
+        qnt_produto = ctk.CTkLabel(frame2, text="Qnt. do produto", text_color=TEXTO_PRINCIPAL, font=fonte_geral)
+        qnt_produto.place(x=20, y=340)
+        self.entrada_qnt = ctk.CTkLabel(frame2, text=f'{self.qnt_prod}', font=fonte_cod, text_color="black", fg_color="white", width=130, height=45)
+        self.entrada_qnt.place(x=20, y=370)
         
         # Frame 3 - Código de barras, Nome
 
-        self.qnt_prod = 0
-        
         codigo_label = ctk.CTkLabel(frame3, text="Código de barras", text_color=TEXTO_PRINCIPAL, font=fonte_geral)
         codigo_label.place(x=20, y=10)
         self.entrada_codigobarras = ctk.CTkEntry(frame3, 
@@ -127,9 +142,15 @@ class Venda(ctk.CTkFrame):
         nome_produto.place(x=20, y=90)
         self.entrada_nome = ctk.CTkLabel(frame3, width=600, height=45, font=fonte_cod, fg_color="white", text_color="black", text=" ")
         self.entrada_nome.place(x=20, y=120)
+
+        # Frame 4 - Botão finalizar compra, tela de resultado
         
-        qnt_produto = ctk.CTkLabel(frame3, text="Qnt. do produto", text_color=TEXTO_PRINCIPAL, font=fonte_geral)
-        qnt_produto.place(x=730, y=10)
-        self.entrada_qnt = ctk.CTkLabel(frame3, text=f'{self.qnt_prod}', font=fonte_cod, text_color="black", fg_color="white", width=130, height=45)
-        self.entrada_qnt.place(x=730, y=40)
-        
+        botao_finalizar = ctk.CTkButton(frame4,
+                                        text="FINALIZAR COMPRA",
+                                        height=55,
+                                        width=130,
+                                        fg_color=BTN_CONFIRMAR,
+                                        text_color=TEXTO_PRINCIPAL,
+                                        font=("Segoe UI", 22, "bold"),
+                                        command= lambda: fv.tela_finalizar(self))
+        botao_finalizar.place(relx=0.5, rely=0.7, anchor="center")

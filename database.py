@@ -32,17 +32,6 @@ def criar_tabelas(conn):
     )
     """)
     
-    #Tabela vendas
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS vendas (
-        id_vendas INTEGER PRIMARY KEY AUTOINCREMENT,
-        produto_id INTEGER,
-        quantidade INTEGER, 
-        total REAL,
-        data_hora INTEGER
-    )
-    """)
-    
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS permissoes (
         id_permissao INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,6 +48,23 @@ def criar_tabelas(conn):
         id_permissao INTEGER,
         
         FOREIGN KEY (id_permissao) REFERENCES permissoes(id_permissao)
+    )
+    """)
+    
+    # Vendas - Criação e salvamento da venda
+    cursor.execute("""CREATE TABLE IF NOT EXISTS vendas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        data TEXT,
+        total REAL
+    )
+    """)
+    
+    cursor.execute("""CREATE TABLE IF NOT EXISTS itens_venda (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_venda INTEGER,
+        id_produto INTEGER,
+        quantidade INTEGER, 
+        preco REAL
     )
     """)
     conn.commit()

@@ -23,12 +23,12 @@ def adicionar_produto(event, venda):
         conn = sqlite3.connect("database.db")
         cursor = conn.cursor()
             
-        cursor.execute("SELECT nome, preco FROM estoque WHERE codigobarras = ?", (codigo,))
+        cursor.execute("SELECT nome, preco, quantidade FROM estoque WHERE codigobarras = ?", (codigo,))
         produto = cursor.fetchone()
         
         if produto:
             
-            nome, preco = produto[0], produto[1]
+            nome, preco, quantidade = produto[0], produto[1], produto[2]
 
             # 1. Criar um frame para a linha (horizontal)
             linha = ctk.CTkFrame(venda.listadecompras, fg_color="transparent", height=40)
@@ -43,7 +43,8 @@ def adicionar_produto(event, venda):
             
             produto_lista = {
                 "nome": nome,
-                "preco": preco
+                "preco": preco,
+                "quantidade": 1
             }
             venda.itens_carrinho.append(produto_lista)
             print(venda.itens_carrinho)
@@ -52,8 +53,8 @@ def adicionar_produto(event, venda):
             venda.entrada_preco.configure(text=f'R$ {preco:.2f}'.replace('.', ','))
             venda.entrada_qnt.configure(text=f'{venda.qnt_prod}')
 
-            total = sum(item["preco"] for item in venda.itens_carrinho)
-            venda.entrada_valor_total.configure(text=f"R$ {total:.2f}".replace(".", ","))
+            venda.total = sum(item["preco"] for item in venda.itens_carrinho)
+            venda.entrada_valor_total.configure(text=f"R$ {venda.total:.2f}".replace(".", ","))
             venda.entrada_quantidade_comprada.configure(text="1")
             
             # Limpar para o próximo
@@ -82,3 +83,81 @@ def procura_dados():
     
     except sqlite3.Error as e:
         print(f'Erro no banco da função procura_dados: {e}')
+        
+def tela_finalizar(self):
+    finalizar = ctk.CTkToplevel(self)
+    finalizar.geometry("650x400")
+    finalizar.attributes("-topmost", True)
+    finalizar.grab_set()
+    finalizar.configure(fg_color=FUNDO_SECUNDARIO)
+    
+    fonte_titulo = ctk.CTkFont("Segoe UI", 22, "bold")
+    fonte_cod = ctk.CTkFont("Segoe UI", 22, "bold")
+    fonte_geral = ctk.CTkFont("Segoe UI", 15, "bold")
+    
+    dados = procura_dados()
+    
+    # Nome do cliente
+    cliente = ctk.CTkLabel(finalizar, text="Cliente", text_color=TEXTO_PRINCIPAL, font=fonte_geral)
+    cliente.place(x=20, y=10)
+    self.opcao_cliente = ctk.StringVar(value="CONSUMIDOR PADRÃO")
+    self.entrada_cliente = ctk.CTkOptionMenu(finalizar,
+                                            values=dados,
+                                            width=430,
+                                            height=35,
+                                            fg_color="white",
+                                            text_color="black",
+                                            font=fonte_cod, 
+                                            dropdown_font=fonte_cod,
+                                            variable=self.opcao_cliente)
+    self.entrada_cliente.place(x=20, y=40)
+    
+    #Forma de pagamento
+    pagamento_label = ctk.CTkLabel(finalizar, text="Forma de Pagamento", text_color=TEXTO_PRINCIPAL, font=fonte_geral)
+    pagamento_label.place(x=480, y=10)
+    
+    self.opcao_pagamento = ctk.StringVar(value="DINHEIRO")
+    self.forma_pagamento = ctk.CTkOptionMenu(finalizar,
+                                             values=["DINHEIRO", "DÉBITO", "CRÉDITO", "PIX", "FIADO"],
+                                             width=55,
+                                             height=35,
+                                             fg_color="white",
+                                             text_color="black",
+                                             dropdown_font=("Segoi UI", 18, "bold"),
+                                             variable=self.opcao_pagamento)
+    self.forma_pagamento.place(x=480, y=40)
+    
+    # Valor Recebido
+    recebido_label = ctk.CTkLabel(finalizar, text="Valor recebido:", text_color=TEXTO_PRINCIPAL, font=fonte_geral)
+    recebido_label.place(x=20, y=150)
+
+    self.recebido_valor = ctk.CTkEntry(finalizar,
+                                       width=100, 
+                                       height=35,
+                                       fg_color="white",
+                                       text_color="black",
+                                       font=fonte_cod,
+                                       placeholder_text="R$ 0,00",
+                                       placeholder_text_color="black")
+    self.recebido_valor.place(x=20, y=180)
+    
+    valor_texto = self.recebido_valor.get()
+    
+    if valor_texto.strip() == "":
+        messagebox.showinfo("Adicione algum produto!", "Adicione algum produto antes de finalizar a venda")
+        return
+    
+    valor_recebido = float(self.recebido_valor.get().replace(",", "."))
+    valor_troco = self.total - valor_recebido
+    
+    print(f'RELATÓRIO DE VENDA: Valor total: R$ {self.total}, Recebido: R$ {valor_recebido}, Troco: R$ {valor_troco}')
+    
+    # Valor total
+    
+    
+    
+    # Troco
+    
+    # Botão finalizar
+    
+    finalizar.mainloop()
